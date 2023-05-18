@@ -14,7 +14,7 @@ mw.addonManager.setWebExports(__name__, r"(web|icons)/.*\.(js|css|png)")
 
 def number_to_field_name_css(fieldno: int) -> str:
     return f"""
-#fields > :nth-child({fieldno}) {{
+.fields > :nth-child({fieldno}) {{
     grid-area: f{fieldno};
 }}
 """

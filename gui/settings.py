@@ -1,6 +1,9 @@
-from aqt import QDialog, QLayout, QKeySequence
+from aqt import QDialog, QLayout, QKeySequence, qtmajor
 
-from .forms.settings_ui import Ui_Settings
+if qtmajor > 5:
+    from .forms.settings_ui_qt6 import Ui_Settings
+else:
+    from .forms.settings_ui_qt5 import Ui_Settings
 
 
 class Settings(QDialog):

@@ -1,18 +1,18 @@
-#fields {
+.fields {
     display: grid;
     grid-column-gap: 0.4rem;
 }
 
-#fields > * {
-    display: flex;
+.fields > * {
+    display: flex !important;
     flex-flow: column;
     min-width: 0;
 }
 
-.field {
+.fields > * {
     flex-grow: 1;
 }
 
-.fname {
+.field-container .label-name {
     white-space: nowrap;
 }

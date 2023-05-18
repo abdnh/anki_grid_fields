@@ -1,3 +1,5 @@
+const NoteEditor = require("anki/NoteEditor");
+
 var gridFields = new (class {
   constructor() {
     this.style = document.createElement("style");
@@ -5,44 +7,44 @@ var gridFields = new (class {
     document.head.appendChild(this.style);
   }
 
-  relayEditingAreaClicksToEditable() {
-    forEditorField([], (field) => {
-      if (!field.hasAttribute("has-click-relayed")) {
-        field.editingArea.addEventListener("click", () => {
-            if (!field.editingArea.contains(document.activeElement)) {
-                field.editingArea.editable.focus({ preventScroll: true });
-                document.execCommand("selectAll", false, null);
-                document.getSelection().collapseToEnd();
-            }
-        });
-        field.setAttribute("has-click-relayed", "");
-      }
-    });
+  getField(idx) {
+    for(const [i, field] of Array.from(document.querySelector(".fields").children).entries()) {
+      if(i == idx) return field;
+    }
+    return null;
   }
 
-  toggleFieldZoom() {
-    const field = getCurrentField();
+  getCurrentFieldOrdinal() {
+    for(const [i, field] of Array.from(document.querySelector(".fields").children).entries()) {
+      if(field.contains(document.activeElement)) return i;
+    }
+    return null;
+  }
+
+  async toggleFieldZoom() {
+    const ord = this.getCurrentFieldOrdinal();
 
     if (typeof this.zoomedField === "number") {
-      const oldEditorField = getEditorField(this.zoomedField);
+      const oldEditorField = this.getField(this.zoomedField);
       oldEditorField.style.gridColumn = "";
       oldEditorField.style.zIndex = "";
-      oldEditorField.labelContainer.style.backgroundColor = "";
+      // TODO
+      // oldEditorField.labelContainer.style.backgroundColor = "";
 
-      if (field && this.zoomedField === field.ord) {
+      if (this.zoomedField === ord) {
         // unzoom
         this.zoomedField = null;
         return;
       }
     }
 
-    if (field) {
-      this.zoomedField = field.ord;
+    if (ord) {
+      this.zoomedField = ord;
 
-      const editorField = getEditorField(this.zoomedField);
+      const editorField = this.getField(this.zoomedField);
       editorField.style.gridColumn = "1 / -1";
-      editorField.style.zIndex = "1";
-      editorField.labelContainer.style.backgroundColor = "var(--bg-color)";
+      editorField.style.zIndex = "100";
+      // editorField.labelContainer.style.backgroundColor = "var(--bg-color)";
     }
   }
 
@@ -56,8 +58,10 @@ var gridFields = new (class {
   }
 
   setupColCount() {
-    const colCount = document.getElementById("colCount");
-    colCount.addEventListener("change", this.setColumnGridsEvent.bind(this));
+    setTimeout(() => {
+      const colCount = document.getElementById("colCount");
+      colCount.addEventListener("change", this.setColumnGridsEvent.bind(this));
+    });
   }
 
   getFieldsTemplateColumnsCss(n) {
@@ -66,7 +70,7 @@ var gridFields = new (class {
       .join(" ");
 
     return `
-#fields {
+.fields {
     grid-template-columns: ${templateColumnsValue};
 }
 `;
@@ -119,7 +123,7 @@ var gridFields = new (class {
 
   numberToGridArea(n) {
     return `
-#fields > :nth-child(${n}) {
+.fields > :nth-child(${n}) {
     grid-area: f${n};
 }
 `;
@@ -133,7 +137,7 @@ var gridFields = new (class {
     const formatted = lines.map((row) => `"${row.join(" ")}"`).join("\n");
 
     return `
-#fields {
+.fields {
 grid-template-areas:
 ${formatted};
 grid-template-columns: ${templateColumns};
@@ -148,15 +152,15 @@ grid-template-columns: ${templateColumns};
       return;
     }
 
-    let css = "";
-
-    forEditorField([], (field) => {
-      css += this.numberToGridArea(field.editingArea.ord + 1);
+    setTimeout(() => {
+      let css = "";
+      for (let i = 0; i < NoteEditor.instances[0].fields.length; i++) {
+        css += this.numberToGridArea(i + 1);
+      }
+      css += this.areasToCss(areas);
+      this.defaultGrids = false;
+      this.style.textContent = css;
     });
 
-    css += this.areasToCss(areas);
-
-    this.defaultGrids = false;
-    this.style.textContent = css;
   }
 })();
