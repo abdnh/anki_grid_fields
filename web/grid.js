@@ -61,7 +61,7 @@ var gridFields = new (class {
     setTimeout(() => {
       const colCount = document.getElementById("colCount");
       colCount.addEventListener("change", this.setColumnGridsEvent.bind(this));
-    });
+    }, 100);
   }
 
   getFieldsTemplateColumnsCss(n) {
@@ -160,7 +160,7 @@ grid-template-columns: ${templateColumns};
       css += this.areasToCss(areas);
       this.defaultGrids = false;
       this.style.textContent = css;
-    });
+    }, 100);
 
   }
 })();
